@@ -774,7 +774,9 @@ class PostgresGrammar extends Grammar
     protected function modifyIncrement(Blueprint $blueprint, Fluent $column)
     {
         if (in_array($column->type, $this->serials) && $column->autoIncrement) {
-            return ' primary key';
+            return sprintf(' constraint "%s" primary key',
+                $column->indexName
+            );
         }
     }
 }

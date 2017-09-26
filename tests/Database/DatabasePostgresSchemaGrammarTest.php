@@ -22,7 +22,7 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('create table "users" ("id" serial primary key not null, "email" varchar(255) not null)', $statements[0]);
+        $this->assertEquals('create table "users" ("id" serial constraint "users_id_primary" primary key not null, "email" varchar(255) not null)', $statements[0]);
 
         $blueprint = new Blueprint('users');
         $blueprint->increments('id');
@@ -30,7 +30,27 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('alter table "users" add column "id" serial primary key not null, add column "email" varchar(255) not null', $statements[0]);
+        $this->assertEquals('alter table "users" add column "id" serial constraint "users_id_primary" primary key not null, add column "email" varchar(255) not null', $statements[0]);
+    }
+
+    public function testBasicCreateTableWithPrimaryKeyCustomIndexNames()
+    {
+        $blueprint = new Blueprint('users');
+        $blueprint->create();
+        $blueprint->increments('id', 'pk_users_id');
+        $blueprint->string('email');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('create table "users" ("id" serial constraint "pk_users_id" primary key not null, "email" varchar(255) not null)', $statements[0]);
+
+        $blueprint = new Blueprint('users');
+        $blueprint->increments('id', 'pk_users_id');
+        $blueprint->string('email');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('alter table "users" add column "id" serial constraint "pk_users_id" primary key not null, add column "email" varchar(255) not null', $statements[0]);
     }
 
     public function testDropTable()
@@ -211,7 +231,17 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('alter table "users" add column "id" serial primary key not null', $statements[0]);
+        $this->assertEquals('alter table "users" add column "id" serial constraint "users_id_primary" primary key not null', $statements[0]);
+    }
+
+    public function testAddingIncrementingIDWithCustomIndexNames()
+    {
+        $blueprint = new Blueprint('users');
+        $blueprint->increments('id', 'pk_users_id');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('alter table "users" add column "id" serial constraint "pk_users_id" primary key not null', $statements[0]);
     }
 
     public function testAddingSmallIncrementingID()
@@ -221,7 +251,17 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('alter table "users" add column "id" smallserial primary key not null', $statements[0]);
+        $this->assertEquals('alter table "users" add column "id" smallserial constraint "users_id_primary" primary key not null', $statements[0]);
+    }
+
+    public function testAddingSmallIncrementingIDWithCustomIndexNames()
+    {
+        $blueprint = new Blueprint('users');
+        $blueprint->smallIncrements('id', 'pk_users_id');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('alter table "users" add column "id" smallserial constraint "pk_users_id" primary key not null', $statements[0]);
     }
 
     public function testAddingMediumIncrementingID()
@@ -231,7 +271,17 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('alter table "users" add column "id" serial primary key not null', $statements[0]);
+        $this->assertEquals('alter table "users" add column "id" serial constraint "users_id_primary" primary key not null', $statements[0]);
+    }
+
+    public function testAddingMediumIncrementingIDWithCustomIndexNames()
+    {
+        $blueprint = new Blueprint('users');
+        $blueprint->mediumIncrements('id', 'pk_users_id');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('alter table "users" add column "id" serial constraint "pk_users_id" primary key not null', $statements[0]);
     }
 
     public function testAddingBigIncrementingID()
@@ -241,7 +291,17 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('alter table "users" add column "id" bigserial primary key not null', $statements[0]);
+        $this->assertEquals('alter table "users" add column "id" bigserial constraint "users_id_primary" primary key not null', $statements[0]);
+    }
+
+    public function testAddingBigIncrementingIDWithCustomIndexNames()
+    {
+        $blueprint = new Blueprint('users');
+        $blueprint->bigIncrements('id', 'pk_users_id');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('alter table "users" add column "id" bigserial constraint "pk_users_id" primary key not null', $statements[0]);
     }
 
     public function testAddingString()
@@ -292,7 +352,14 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('alter table "users" add column "foo" bigserial primary key not null', $statements[0]);
+        $this->assertEquals('alter table "users" add column "foo" bigserial constraint "users_foo_primary" primary key not null', $statements[0]);
+
+        $blueprint = new Blueprint('users');
+        $blueprint->bigInteger('foo', true, false, 'pk_users_foo');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('alter table "users" add column "foo" bigserial constraint "pk_users_foo" primary key not null', $statements[0]);
     }
 
     public function testAddingInteger()
@@ -309,7 +376,14 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('alter table "users" add column "foo" serial primary key not null', $statements[0]);
+        $this->assertEquals('alter table "users" add column "foo" serial constraint "users_foo_primary" primary key not null', $statements[0]);
+
+        $blueprint = new Blueprint('users');
+        $blueprint->integer('foo', true, false, 'pk_users_foo');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('alter table "users" add column "foo" serial constraint "pk_users_foo" primary key not null', $statements[0]);
     }
 
     public function testAddingMediumInteger()
@@ -326,7 +400,14 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('alter table "users" add column "foo" serial primary key not null', $statements[0]);
+        $this->assertEquals('alter table "users" add column "foo" serial constraint "users_foo_primary" primary key not null', $statements[0]);
+
+        $blueprint = new Blueprint('users');
+        $blueprint->mediumInteger('foo', true, false, 'pk_users_foo');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('alter table "users" add column "foo" serial constraint "pk_users_foo" primary key not null', $statements[0]);
     }
 
     public function testAddingTinyInteger()
@@ -343,7 +424,14 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('alter table "users" add column "foo" smallserial primary key not null', $statements[0]);
+        $this->assertEquals('alter table "users" add column "foo" smallserial constraint "users_foo_primary" primary key not null', $statements[0]);
+
+        $blueprint = new Blueprint('users');
+        $blueprint->tinyInteger('foo', true, false, 'pk_users_foo');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('alter table "users" add column "foo" smallserial constraint "pk_users_foo" primary key not null', $statements[0]);
     }
 
     public function testAddingSmallInteger()
@@ -360,7 +448,14 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertEquals('alter table "users" add column "foo" smallserial primary key not null', $statements[0]);
+        $this->assertEquals('alter table "users" add column "foo" smallserial constraint "users_foo_primary" primary key not null', $statements[0]);
+
+        $blueprint = new Blueprint('users');
+        $blueprint->smallInteger('foo', true, false, 'pk_users_foo');
+        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertEquals('alter table "users" add column "foo" smallserial constraint "pk_users_foo" primary key not null', $statements[0]);
     }
 
     public function testAddingFloat()
